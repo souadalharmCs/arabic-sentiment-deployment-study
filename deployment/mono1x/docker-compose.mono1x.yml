@@ -1,0 +1,25 @@
+name: mono1x
+
+# Monolithic: one FastAPI + MARBERT container, 2 CPUs (same per-replica budget as micro3)
+services:
+  api:
+    image: sentiment-system2-api1:latest
+    container_name: mono1x-api
+    environment:
+      CUDA_VISIBLE_DEVICES: ""
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+    cpus: 2
+    mem_limit: 2g
+    ports:
+      - "8080:8000"
+    restart: "no"
+
+volumes:
+  hf_cache:
+    external: true

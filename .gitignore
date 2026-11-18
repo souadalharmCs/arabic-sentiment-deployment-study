@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+
+# Model weights
+*.safetensors
+*.pt
+*.bin
+
+# Logs
+*.log
+
+# Dataset files
+*.csv
+*.xlsx
+
+# Real comments
+sentences.txt
+
+# System files
+.DS_Store
+Thumbs.db

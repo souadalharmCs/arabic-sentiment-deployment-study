@@ -1,0 +1,51 @@
+name: micro3lc
+
+# Common settings for the 3 replicas (CPU only, equal resources)
+x-api: &api
+  environment:
+    CUDA_VISIBLE_DEVICES: ""        # force CPU
+    OMP_NUM_THREADS: "1"            # match the 2 CPUs per replica
+    MKL_NUM_THREADS: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    HF_HUB_OFFLINE: "1"             # tokenizer is read from the cache volume, no internet
+    TRANSFORMERS_OFFLINE: "1"
+  volumes:
+    - hf_cache:/root/.cache/huggingface
+  cpus: 2
+  mem_limit: 2g
+  expose:
+    - "8000"                        # change if your app listens on another port
+  restart: "no"
+
+services:
+  api1:
+    <<: *api
+    image: sentiment-system2-api1:latest
+    container_name: micro3lc-api1
+  api2:
+    <<: *api
+    image: sentiment-system2-api2:latest
+    container_name: micro3lc-api2
+  api3:
+    <<: *api
+    image: sentiment-system2-api3:latest
+    container_name: micro3lc-api3
+
+  nginx:
+    image: nginx:latest
+    container_name: micro3lc-nginx
+    cpus: 1
+    mem_limit: 256m
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    depends_on:
+      - api1
+      - api2
+      - api3
+
+volumes:
+  hf_cache:
+    external: true                  # created once: docker volume create hf_cache
